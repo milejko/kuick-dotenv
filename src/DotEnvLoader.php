@@ -26,9 +26,9 @@ class DotEnvLoader
     private const ENV_FILE_PREFIX = '.env.';
     private const LOCAL_SUFFIX = '.local';
 
-    public static function fromDirectory(string $projectDir): void
+    public static function fromDirectory(string $dotenvDir): void
     {
-        $directoryIterator = new GlobIterator($projectDir . DIRECTORY_SEPARATOR . self::MAIN_ENV_FILE . '*', FilesystemIterator::KEY_AS_FILENAME);
+        $directoryIterator = new GlobIterator($dotenvDir . DIRECTORY_SEPARATOR . self::MAIN_ENV_FILE . '*', FilesystemIterator::KEY_AS_FILENAME);
         $dotEnvFileList = [];
         //creating .env* files map
         foreach ($directoryIterator as $fileName => $dotEnvFile) {
