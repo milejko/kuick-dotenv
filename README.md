@@ -21,5 +21,5 @@ composer require kuick/dotenv
 ```
 use Kuick\Dotenv\DotenvLoader;
 
-DotenvLoader::fromDirectory('./path-to-env-files');
+DotenvLoader::fromDirectory('/a-directory/containing/dot-env/files');
 ```
