@@ -38,7 +38,6 @@ class DotEnvLoaderTest extends TestCase
         putenv('OVERRIDE_DEV');
         putenv('OVERRIDE_DEV_LOCAL');
         putenv('TESTING=no-override');
-        //putenv('ONLY_LOCAL=local value');
         putenv('UNTOUCHED=untouched');
         DotEnvLoader::fromDirectory(dirname(__DIR__) . '/Mocks/MockProjectDir');
         assertEquals('no-override', getenv('TESTING'));
