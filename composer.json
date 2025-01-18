@@ -1,0 +1,42 @@
+{
+    "name": "kuick/dotenv",
+    "type": "library",
+    "description": "Kuick Dotenv is DotEnv parser for PHP",
+    "keywords": ["dot env", ".env", "kuick"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mariusz Miłejko",
+            "email": "mariusz@milejko.pl"
+        }
+    ],
+    "require": {
+        "php": ">=8.2.0"
+    },
+    "scripts": {
+        "fix:phpcbf": "phpcbf --standard=PSR12 src tests",
+        "test:phpstan": "XDEBUG_MODE=off phpstan --level=9 --no-progress --memory-limit=512M analyse src tests",
+        "test:phpcs": "phpcs -n --standard=PSR12 ./src ./tests",
+        "test:phpmd": "phpmd src text cleancode,codesize,controversial,design,naming,unusedcode",
+        "test:phpunit": "XDEBUG_MODE=coverage phpunit",
+        "test:all": [
+            "@test:phpcs",
+            "@test:phpstan",
+            "@test:phpmd",
+            "@test:phpunit"
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "Kuick\\Dotenv\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kuick\\Dotenv\\Tests\\": "tests"
+        }
+    },
+    "require-dev": {
+        "kuick/qa-toolkit": "^1.0"
+    }
+}
