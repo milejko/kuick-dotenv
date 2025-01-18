@@ -1,4 +1,5 @@
 composer.lock
+/public/build
 /clover.xml
 /.idea
 /.php*
