@@ -28,46 +28,62 @@ class DotEnvLoader
 
     public static function fromDirectory(string $dotenvDir): void
     {
-        $directoryIterator = new GlobIterator($dotenvDir . DIRECTORY_SEPARATOR . self::MAIN_ENV_FILE . '*', FilesystemIterator::KEY_AS_FILENAME);
-        $dotEnvFileList = [];
-        //creating .env* files map
-        foreach ($directoryIterator as $fileName => $dotEnvFile) {
-            $dotEnvFileList[$fileName] = $dotEnvFile->getPathname();
-        }
-        //.env values
-        $dotEnvValues = isset($dotEnvFileList[self::MAIN_ENV_FILE]) ? parse_ini_file($dotEnvFileList[self::MAIN_ENV_FILE]) : [];
+        $fileMap = self::buildFileMap($dotenvDir);
 
-        //.env.local values
-        if (isset($dotEnvFileList[self::MAIN_ENV_FILE . self::LOCAL_SUFFIX])) {
-            $dotEnvValues = array_merge(
-                $dotEnvValues,
-                parse_ini_file($dotEnvFileList[self::MAIN_ENV_FILE . self::LOCAL_SUFFIX])
-            );
-        }
-        //app env calculation
-        $appEnv = (false === getenv(self::APP_ENV)) ?
-            ($dotEnvValues[self::APP_ENV] ?? self::ENV_PROD) :
-            getenv(self::APP_ENV);
+        $dotEnvValues = self::parseFileFromMap($fileMap, self::MAIN_ENV_FILE);
+        $dotEnvValues = [...$dotEnvValues, ...self::parseFileFromMap($fileMap, self::MAIN_ENV_FILE . self::LOCAL_SUFFIX)];
 
-        //app env specific .env (ie. .env.prod) values
-        if (isset($dotEnvFileList[self::ENV_FILE_PREFIX . $appEnv])) {
-            $dotEnvValues = array_merge(
-                $dotEnvValues,
-                parse_ini_file($dotEnvFileList[self::ENV_FILE_PREFIX . $appEnv])
-            );
-        }
+        $appEnv = self::resolveAppEnv($dotEnvValues);
 
-        //app env specific local .env (ie. .env.prod.local) values
-        if (isset($dotEnvFileList[self::ENV_FILE_PREFIX . $appEnv . self::LOCAL_SUFFIX])) {
-            $dotEnvValues = array_merge(
-                $dotEnvValues,
-                parse_ini_file($dotEnvFileList[self::ENV_FILE_PREFIX . $appEnv . self::LOCAL_SUFFIX])
-            );
-        }
+        $dotEnvValues = [...$dotEnvValues, ...self::parseFileFromMap($fileMap, self::ENV_FILE_PREFIX . $appEnv)];
+        $dotEnvValues = [...$dotEnvValues, ...self::parseFileFromMap($fileMap, self::ENV_FILE_PREFIX . $appEnv . self::LOCAL_SUFFIX)];
 
         self::pushToEnvironment($dotEnvValues);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    private static function buildFileMap(string $dotenvDir): array
+    {
+        $iterator = new GlobIterator(
+            $dotenvDir . DIRECTORY_SEPARATOR . self::MAIN_ENV_FILE . '*',
+            FilesystemIterator::KEY_AS_FILENAME | FilesystemIterator::CURRENT_AS_PATHNAME
+        );
+        $fileMap = [];
+        foreach ($iterator as $fileName => $filePath) {
+            $fileMap[$fileName] = $filePath;
+        }
+        return $fileMap;
+    }
+
+    /**
+     * @param array<string, string> $fileMap
+     * @return array<string, string>
+     */
+    private static function parseFileFromMap(array $fileMap, string $fileName): array
+    {
+        if (!isset($fileMap[$fileName])) {
+            return [];
+        }
+        return parse_ini_file($fileMap[$fileName]) ?: [];
+    }
+
+    /**
+     * @param array<string, string> $dotEnvValues
+     */
+    private static function resolveAppEnv(array $dotEnvValues): string
+    {
+        $envFromSystem = getenv(self::APP_ENV);
+        if (false !== $envFromSystem) {
+            return $envFromSystem;
+        }
+        return $dotEnvValues[self::APP_ENV] ?? self::ENV_PROD;
+    }
+
+    /**
+     * @param array<string, string> $values
+     */
     private static function pushToEnvironment(array $values): void
     {
         foreach ($values as $key => $value) {

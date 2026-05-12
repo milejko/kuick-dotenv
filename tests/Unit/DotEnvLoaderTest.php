@@ -3,13 +3,12 @@
 namespace Kuick\Tests\Dotenv;
 
 use Kuick\Dotenv\DotEnvLoader;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function PHPUnit\Framework\assertEquals;
 
-/**
- * @covers \Kuick\Dotenv\DotEnvLoader
- */
+#[CoversClass(DotEnvLoader::class)]
 class DotEnvLoaderTest extends TestCase
 {
     public function testIfEnvironmentIsProperlyInherited(): void
